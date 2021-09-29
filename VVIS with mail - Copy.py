@@ -82,9 +82,9 @@ def Send(name, subject, places, web):
         print(f"sent to: {name}")
     
     #Delete images
-    for i in range(len(places)):
-        if(os.path.isfile(f"{places[i]}.png") == True):
-            os.remove(f"{places[i]}.png")
+    for i in places:
+        if(os.path.isfile(f"{i}.png") == True):
+            os.remove(f"{i}.png")
 
 
 @web_site.route('/',methods = ['GET','POST'])
