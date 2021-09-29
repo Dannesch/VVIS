@@ -23,6 +23,7 @@ web_def = ["https://vvis.trafikverket.se/","https://vvis.trafikverket.se/Functio
 pyautogui.FAILSAFE = True
 
 def Send(name, subject, places, web):
+    vvis_start = True
     body = f"{name}"
     receiver_email = "do.norraroslagen@svevia.se"
     if (name == "Test"):
@@ -40,11 +41,16 @@ def Send(name, subject, places, web):
             time.sleep(1)
             pyautogui.press('f11')
             time.sleep(8)
-            place = pyautogui.locateOnScreen('loggin.png')
-            w=place[2]/2
-            h=place[3]/2
-            x=place[0]+w
-            y=place[1]+h
+            while vvis_start:
+                try:
+                    place = pyautogui.locateOnScreen('loggin.png')
+                    w=place[2]/2
+                    h=place[3]/2
+                    x=place[0]+w
+                    y=place[1]+h
+                    vvis_start = False
+                except:
+                    vvis_start = True
             time.sleep(2)
             pyautogui.moveTo(x, y, duration=0)
             time.sleep(2)
