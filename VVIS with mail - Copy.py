@@ -55,7 +55,7 @@ def Send(name, subject, places, web):
             pyautogui.moveTo(x, y, duration=0)
             time.sleep(2)
             pyautogui.click()
-        time.sleep(8)
+        time.sleep(12)
         pyautogui.screenshot(f"{places[i]}.png")
         time.sleep(2)
     pyautogui.hotkey('alt', 'f4')
