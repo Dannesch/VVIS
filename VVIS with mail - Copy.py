@@ -50,7 +50,7 @@ def Send(name, subject, places, web):
                     y=place[1]+h
                     vvis_start = False
                 except:
-                    vvis_start = True
+                    pass
             time.sleep(2)
             pyautogui.moveTo(x, y, duration=0)
             time.sleep(2)
