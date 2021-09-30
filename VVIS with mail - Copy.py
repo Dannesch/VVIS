@@ -22,11 +22,11 @@ places_def = ["Karta", "Soderhall", "Sattra", "Sono", "Glugga", "Aby", "Vaddo", 
 web_def = ["https://vvis.trafikverket.se/","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=224&RetX=688646&RetY=6619193", "https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=309&RetX=694731&RetY=6661526","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=238&RetX=702669&RetY=6645651","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=308&RetX=677004&RetY=6643005","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=229&RetX=671448&RetY=6627659","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=239&RetX=711061&RetY=6656764","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=306&RetX=668992&RetY=6661526","https://vvis.trafikverket.se/Functions/Slip/Slipmap.aspx"]
 pyautogui.FAILSAFE = True
 
-def Send(name, subject, places, web):
+def send(name, subject, places, web):
     vvis_start = True
     body = f"{name}"
     receiver_email = "do.norraroslagen@svevia.se"
-    if (name == "Test"):
+    if (name.lower() == "test"):
         receiver_email = "dschem.ds@gmail.com"
     message = MIMEMultipart()
     message["From"] = sender_email
@@ -104,7 +104,7 @@ def index():
             date = now.strftime("%y%m%d")
             tm = now.strftime("%H%M")
             print(f"Recived from: {age} at {date} kl {tm}")
-            Send(age, f"VVIS {date} kl {tm}", places_def, web_def)
+            send(age, f"VVIS {date} kl {tm}", places_def, web_def)
     return render_template('index.html')
 
 web_site.run(host='0.0.0.0', port=8080)
