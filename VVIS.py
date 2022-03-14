@@ -16,8 +16,8 @@ web = Flask(__name__)
 sender_email = "dsanne75@gmail.com"
 password = "rnrjdiiwsojxmqcg"
 
-names = ["Karta", "Soderhall", "Sattra", "Sono", "Glugga", "Aby", "Vaddo", "Alunda", "Halkriskkarta"]
-urls = ["https://vvis.trafikverket.se/","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=224&RetX=688646&RetY=6619193", "https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=309&RetX=694731&RetY=6661526","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=238&RetX=702669&RetY=6645651","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=308&RetX=677004&RetY=6643005","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=229&RetX=671448&RetY=6627659","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=239&RetX=711061&RetY=6656764","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=306&RetX=668992&RetY=6661526","https://vvis.trafikverket.se/Functions/Slip/Slipmap.aspx"]
+names = ["Karta", "Soderhall", "Sattra", "Sono", "Glugga", "Aby", "Vaddo", "Alunda", "Halkriskkarta", "Prognos"]
+urls = ["https://vvis.trafikverket.se/","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=224&RetX=688646&RetY=6619193", "https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=309&RetX=694731&RetY=6661526","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=238&RetX=702669&RetY=6645651","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=308&RetX=677004&RetY=6643005","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=229&RetX=671448&RetY=6627659","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=239&RetX=711061&RetY=6656764","https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=306&RetX=668992&RetY=6661526","https://vvis.trafikverket.se/Functions/Slip/Slipmap.aspx","https://vvis.trafikverket.se/Functions/TextPrognos/TextPrognos2.aspx"]
 
 def screenshooter():
     with sync_playwright() as p:
@@ -32,6 +32,10 @@ def screenshooter():
                 page.locator("input[name=\"ctl00\\$ContentPlaceHolder1\\$VViSLoginControl\\$tabsAccountLogin\\$tabLogin\\$ucLoginTo\\$txtPassWord1\"]").fill("Vagen22")
                 with page.expect_navigation():
                     page.locator("input[name=\"ctl00\\$ContentPlaceHolder1\\$VViSLoginControl\\$tabsAccountLogin\\$tabLogin\\$ucLoginTo\\$txtPassWord1\"]").press("Enter")
+            if names[i] == "Prognos":
+                page.locator("a[role=\"presentation\"]:has-text(\"Svealand\")").click()
+                page.locator("text=Visa delprognosområde: AllaStockholms län utom RoslagskustenStockholms län, Rosl >> select").select_option("Stockholms län, Roslagskusten")
+                page.locator("text=Visa delprognosområde: AllaStockholms län utom RoslagskustenStockholms län, Rosl >> #inputOK").click()
             delay(3)
             page.screenshot(path=names[i]+".png")
         browser.close()
