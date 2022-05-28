@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html charset="utf-8">
+<html lang="en">
 
 <head>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
-    integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>VVIS</title>
 </head>
 
 <body>
@@ -12,13 +15,14 @@
       alert("Klart!");
     }
   </script>
-  <h1>Skriv namn och tryck skicka</h1>
-  <form method="POST" action="/">
-    <div class="form-group">
-      <input type="text" name="name" autofocus autocomplete="on" placeholder="Namn">
-    </div>
-    <input class="btn btn-primary" type="submit" onclick=cl_web() value="Skicka">
-  </form>
+  <div class="container">
+    <h1>Skriv namn och tryck skicka</h1>
+    <div class="break"></div>
+    <form class="form" method="POST" action="/">
+      <input class="name" type="text" name="name" autofocus autocomplete="on" placeholder="Namn">
+      <input class="button" type="submit" onclick=cl_web() value="Skicka">
+    </form>
+  </div>
 </body>
 
 </html>

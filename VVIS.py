@@ -1,8 +1,6 @@
-import email, smtplib, ssl
+import smtplib, ssl
 import os
-import time
 import pytz
-import os.path
 from time import sleep as delay
 from playwright.sync_api import sync_playwright
 from flask import Flask, render_template, request
