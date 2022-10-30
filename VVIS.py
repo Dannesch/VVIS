@@ -1,20 +1,27 @@
 import smtplib, ssl
 import os
-from time import sleep as delay
-from playwright.sync_api import sync_playwright
+from time import sleep
+from playwright.async_api import async_playwright
+
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import Union
+
 sender_email = os.environ['sender']
-receiver_email = os.environ['receiver']
+receiver_email = [os.environ['receiver']]
 password = os.environ['password']
 mail_server = os.environ['mail_server']
-smtp_port = os.environ['smtp_port']
+smtp_port = int(os.environ['smtp_port'])
 vvis_email = os.environ['vvis_email']
 vvis_password = os.environ['vvis_password']
+key = os.environ['key']
 
+app = FastAPI()
 locations = {
     "Karta": "https://vvis.trafikverket.se/",
     "Soderhall": "https://vvis.trafikverket.se/Functions/StationInfo/StationInfoPopup.aspx?Railroad=false&Term=yttempftyta&StationId=224&RetX=688646&RetY=6619193",
@@ -28,45 +35,54 @@ locations = {
     "Textprognos": "https://vvis.trafikverket.se/Functions/TextPrognos/TextPrognos2.aspx"
 }
 
-def screenshooter(locs):
+class Send_data(BaseModel):
+    key: str
+    body: str
+    subject: Union[str, None] = "VVIS"
+    receivers = receiver_email
+    locs: Union[list, None] = ['Karta',"Soderhall","Sattra","Sono","Glugga","Aby","Vaddo","Alunda","Halkriskkarta","Textprognos"]
+
+async def screenshooter(locs):
     vvis_logged_in = False
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        page = browser.new_page()
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page()
         for loc in locs:
             name=loc
             url=locations[loc]
-            page.goto(url)
+            await page.goto(url)
 
             if "vvis.trafikverket.se" in url:
                 if not vvis_logged_in:
-                    page.locator("input[name=\"ctl00\\$ContentPlaceHolder1\\$VViSLoginControl\\$tabsAccountLogin\\$tabLogin\\$ucLoginTo\\$txtUserName\"]").click()
-                    page.locator("input[name=\"ctl00\\$ContentPlaceHolder1\\$VViSLoginControl\\$tabsAccountLogin\\$tabLogin\\$ucLoginTo\\$txtUserName\"]").fill(vvis_email)
-                    page.locator("input[name=\"ctl00\\$ContentPlaceHolder1\\$VViSLoginControl\\$tabsAccountLogin\\$tabLogin\\$ucLoginTo\\$txtUserName\"]").press("Tab")
-                    page.locator("input[name=\"ctl00\\$ContentPlaceHolder1\\$VViSLoginControl\\$tabsAccountLogin\\$tabLogin\\$ucLoginTo\\$txtPassWord1\"]").fill(vvis_password)
-                    with page.expect_navigation():
-                        page.locator("input[name=\"ctl00\\$ContentPlaceHolder1\\$VViSLoginControl\\$tabsAccountLogin\\$tabLogin\\$ucLoginTo\\$txtPassWord1\"]").press("Enter")
+                    await page.locator("input[name=\"ctl00\\$ContentPlaceHolder1\\$VViSLoginControl\\$tabsAccountLogin\\$tabLogin\\$ucLoginTo\\$txtUserName\"]").click()
+                    await page.locator("input[name=\"ctl00\\$ContentPlaceHolder1\\$VViSLoginControl\\$tabsAccountLogin\\$tabLogin\\$ucLoginTo\\$txtUserName\"]").fill(vvis_email)
+                    await page.locator("input[name=\"ctl00\\$ContentPlaceHolder1\\$VViSLoginControl\\$tabsAccountLogin\\$tabLogin\\$ucLoginTo\\$txtUserName\"]").press("Tab")
+                    await page.locator("input[name=\"ctl00\\$ContentPlaceHolder1\\$VViSLoginControl\\$tabsAccountLogin\\$tabLogin\\$ucLoginTo\\$txtPassWord1\"]").fill(vvis_password)
+                    async with page.expect_navigation():
+                        await page.locator("input[name=\"ctl00\\$ContentPlaceHolder1\\$VViSLoginControl\\$tabsAccountLogin\\$tabLogin\\$ucLoginTo\\$txtPassWord1\"]").press("Enter")
                     vvis_logged_in = True
 
                 if name == "Textprognos":
-                    page.locator("a[role=\"presentation\"]:has-text(\"Svealand\")").click()
-                    page.locator("text=Visa delprognosområde: AllaStockholms län utom RoslagskustenStockholms län, Rosl >> select").select_option("Stockholms län, Roslagskusten")
-                    page.locator("text=Visa delprognosområde: AllaStockholms län utom RoslagskustenStockholms län, Rosl >> #inputOK").click()
+                    await page.locator("a[role=\"presentation\"]:has-text(\"Svealand\")").click()
+                    await page.locator("text=Visa delprognosområde: AllaStockholms län utom RoslagskustenStockholms län, Rosl >> select").select_option("Stockholms län, Roslagskusten")
+                    await page.locator("text=Visa delprognosområde: AllaStockholms län utom RoslagskustenStockholms län, Rosl >> #inputOK").click()
 
-            delay(3)
-            page.screenshot(path=name+".png")
-        browser.close()
+            sleep(3)
+            await page.screenshot(path=name+".png")
+        await browser.close()
 
-def is_string(string, seps = [", ", " ", "; ", ","]):
-    if isinstance(string, str):
-        string = string.strip()
-        for sep in seps:
-            if sep in string:
-                string = string.split(", ")
-    return string
-
-def send(body, subject, receivers = receiver_email, locs:list = ['Karta',"Soderhall","Sattra","Sono","Glugga","Aby","Vaddo","Alunda","Halkriskkarta","Textprognos"]):
-    receivers = is_string(receivers)
+@app.post("/send/")
+async def send(data:Send_data):
+    body = data.body
+    subject = data.subject
+    receivers = data.receivers
+    locs = data.locs
+    
+    if key != data.key:
+        return {    
+            "data": "Wrong key",
+            "finish": False
+        }
 
     body = str(body)
     message = MIMEMultipart()
@@ -74,10 +90,10 @@ def send(body, subject, receivers = receiver_email, locs:list = ['Karta',"Soderh
     message["Subject"] = subject
     message.attach(MIMEText(body, "plain"))
 
-    screenshooter(locs)
+    await screenshooter(locs)
 
     #Attatching images to mail
-    for loc in locs:
+    for loc in locs: # type: ignore
         filename = f"{loc}.png"
         with open(filename, "rb") as attachment:
             part = MIMEBase("application", "octet-stream")
@@ -95,9 +111,19 @@ def send(body, subject, receivers = receiver_email, locs:list = ['Karta',"Soderh
     with smtplib.SMTP_SSL(mail_server, smtp_port, context=context) as server:
         server.login(sender_email, password)
         server.sendmail(sender_email, receivers, text)
-        print(body)
+        print(body, "; Sent to: ", receiver_email, sep="")
     
     #Delete images
-    for loc in locs:
+    for loc in locs: # type: ignore
         if(os.path.isfile(f"{loc}.png") == True):
             os.remove(f"{loc}.png")
+
+    return {
+        "data":{
+            "body": body,
+            "subject": subject,
+            "receivers": receivers,
+            "locs": locs
+        },
+        "finish": True
+    }

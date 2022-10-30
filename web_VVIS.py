@@ -6,7 +6,7 @@ web = Flask(__name__)
 receiver_email = "test_mail@test.com"
 
 def send(name, message, receivers):
-    print(name, message)
+    print(name, message, receivers)
 
 @web.route('/',methods = ['GET','POST'])
 def index():

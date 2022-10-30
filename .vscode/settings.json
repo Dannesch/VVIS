@@ -1,0 +1,8 @@
+{
+    "python.analysis.typeCheckingMode": "basic",
+    "files.exclude": {
+        ".vscode": true,
+        ".gitignore": true
+    },
+    "workspace.isHidden": true
+}
