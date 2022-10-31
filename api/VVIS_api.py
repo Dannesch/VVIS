@@ -11,6 +11,7 @@ from email.mime.text import MIMEText
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Union
+from enum import Enum
 
 sender_email = os.environ['sender']
 receiver_email = [os.environ['receiver']]
@@ -35,12 +36,18 @@ locations = {
     "Textprognos": "https://vvis.trafikverket.se/Functions/TextPrognos/TextPrognos2.aspx"
 }
 
+class CEnum(Enum):
+    different = 'different'
+    normal = 'normal'
+
 class Send_data(BaseModel):
     key: str
     body: str
+    mode: CEnum = CEnum.normal
     subject: Union[str, None] = "VVIS"
     receivers = receiver_email
     locs: Union[list, None] = ['Karta',"Soderhall","Sattra","Sono","Glugga","Aby","Vaddo","Alunda","Halkriskkarta","Textprognos"]
+    locs_dict: Union[dict, None] = {}
 
 async def screenshooter(locs):
     vvis_logged_in = False
@@ -77,7 +84,14 @@ async def send(data:Send_data):
     subject = data.subject
     receivers = data.receivers
     locs = data.locs
-    
+    locs_dict = data.locs_dict
+    mode = data.mode
+    print("Request received")
+
+    if mode == CEnum.normal:
+        for i in receivers:
+            locs_dict[i] = data.locs # type: ignore
+
     if key != data.key:
         return {    
             "data": "Wrong key",
@@ -85,33 +99,34 @@ async def send(data:Send_data):
         }
 
     body = str(body)
-    message = MIMEMultipart()
-    message["From"] = sender_email
-    message["Subject"] = subject
-    message.attach(MIMEText(body, "plain"))
 
     await screenshooter(locs)
+    for i, j in locs_dict.items(): # type: ignore
+        message = MIMEMultipart()
+        message["From"] = sender_email
+        message["Subject"] = subject
+        message.attach(MIMEText(body, "plain"))
+        
+        #Attatching images to mail
+        for loc in j: # type: ignore
+            filename = f"{loc}.png"
+            with open(filename, "rb") as attachment:
+                part = MIMEBase("application", "octet-stream")
+                part.set_payload(attachment.read())
+            encoders.encode_base64(part)
+            part.add_header(
+                "Content-Disposition",
+                f"attachment; filename= {filename}",
+            )
+            message.attach(part)
+        text = message.as_string()
 
-    #Attatching images to mail
-    for loc in locs: # type: ignore
-        filename = f"{loc}.png"
-        with open(filename, "rb") as attachment:
-            part = MIMEBase("application", "octet-stream")
-            part.set_payload(attachment.read())
-        encoders.encode_base64(part)
-        part.add_header(
-            "Content-Disposition",
-            f"attachment; filename= {filename}",
-        )
-        message.attach(part)
-    text = message.as_string()
-
-    # Log in and send mail
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL(mail_server, smtp_port, context=context) as server:
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receivers, text)
-        print(body, "; Sent to: ", receiver_email, sep="")
+        # Log in and send mail
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(mail_server, smtp_port, context=context) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, i, text)
+            print(subject, "; Sent to: ", i, sep="")
     
     #Delete images
     for loc in locs: # type: ignore

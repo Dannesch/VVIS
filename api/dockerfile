@@ -2,8 +2,7 @@ FROM mcr.microsoft.com/playwright/python:v1.25.0-focal
 
 LABEL Maintainer="dannesch"
 WORKDIR /home
-COPY ./templates/index.html ./templates/index.html
-COPY ./VVIS.py ./VVIS.py
+COPY ./VVIS_api.py ./VVIS.py
 COPY ./requirements_api.txt ./requirements.txt
 
 RUN python -m pip install pip --upgrade

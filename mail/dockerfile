@@ -1,0 +1,9 @@
+FROM python:latest
+
+LABEL Maintainer="dannesch"
+WORKDIR /home
+COPY ./VVIS_mail.py ./VVIS.py
+COPY ./requirements_mail.txt ./requirements.txt
+
+RUN python -m pip install -r requirements.txt
+CMD ["python", "-u", "VVIS.py"]
