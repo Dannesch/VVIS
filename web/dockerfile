@@ -1,0 +1,10 @@
+FROM python:latest
+
+LABEL Maintainer="dannesch"
+WORKDIR /home
+COPY ./VVIS_web.py ./VVIS.py
+COPY ./requirements_web.txt ./requirements.txt
+COPY ./templates/index.html ./templates/index.html
+
+RUN python -m pip install -r requirements.txt
+CMD ["python", "-u", "VVIS.py"]

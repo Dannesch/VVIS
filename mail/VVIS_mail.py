@@ -60,7 +60,7 @@ while True:
                         "locs_dict": recipiant_loc_list
                     }
                     resp = requests.post(api, data=json.dumps(data))
-                    print(resp.json())
+                    print(resp.text)
                     
             old_len = len(bodies)
             old_list = bodies
